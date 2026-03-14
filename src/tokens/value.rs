@@ -11,7 +11,7 @@ use crate::{slices::*, traits::Parsable};
 
 pub struct ValueTag;
 
-pub type Value<'a> = SlicesWrapper<'a, ValueTag>;
+pub type Value<'a> = Slices<'a, ValueTag>;
 
 impl<'a> Parsable<'a> for Value<'a> {
     fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {

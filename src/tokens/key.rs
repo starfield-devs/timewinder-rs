@@ -11,7 +11,7 @@ use crate::{slices::*, traits::Parsable};
 
 pub struct KeyTag;
 
-pub type Key<'a> = SlicesWrapper<'a, KeyTag>;
+pub type Key<'a> = Slices<'a, KeyTag>;
 
 impl<'a> Parsable<'a> for Key<'a> {
     fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {

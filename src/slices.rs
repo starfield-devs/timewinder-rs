@@ -5,66 +5,55 @@ use std::{
 
 use crate::traits::*;
 
-#[derive(Default, PartialEq, Eq)]
-pub struct SlicesContainer<'a> {
-    pub slices: Vec<&'a str>,
-}
-
-impl<'a> SlicesContainer<'a> {
-    pub fn new(slices: Vec<&'a str>) -> Self {
-        Self { slices }
-    }
-}
-
 #[derive(PartialEq, Eq)]
-pub struct SlicesWrapper<'a, T> {
-    pub inner: SlicesContainer<'a>,
+pub struct Slices<'a, T> {
+    pub slices: Vec<&'a str>,
     _marker: PhantomData<T>,
 }
 
-impl<'a, T> SlicesWrapper<'a, T> {
+impl<'a, T> Slices<'a, T> {
     pub fn new(slices: Vec<&'a str>) -> Self {
         Self {
-            inner: SlicesContainer { slices },
+            slices,
             _marker: PhantomData,
         }
     }
 }
 
-impl<'a, T> Default for SlicesWrapper<'a, T> {
+impl<'a, T> Default for Slices<'a, T> {
     fn default() -> Self {
         Self {
-            inner: SlicesContainer::default(),
+            slices: Vec::default(),
             _marker: PhantomData,
         }
     }
 }
 
-impl<'a, T> Debug for SlicesWrapper<'a, T> {
+impl<'a, T> Debug for Slices<'a, T> {
     fn fmt(
         &self,
         f: &mut Formatter<'_>,
     ) -> Result {
-        for s in &self.inner.slices {
+        for s in &self.slices {
             write!(f, "{}", s)?;
         }
         Ok(())
     }
 }
 
-impl<'a, T> AsRef<[&'a str]> for SlicesWrapper<'a, T> {
+impl<'a, T> AsRef<[&'a str]> for Slices<'a, T> {
     fn as_ref(&self) -> &[&'a str] {
-        &self.inner.slices
+        &self.slices
     }
 }
 
-impl<'a, T> SlicesOps<'a> for SlicesWrapper<'a, T> {
+impl<'a, T> SlicesOps<'a> for Slices<'a, T> {
     fn slices(&self) -> &[&'a str] {
-        &self.inner.slices
+        &self.slices
     }
 }
 
-impl<'a, T> EqualsTarget<'a> for &SlicesWrapper<'a, T> {
+impl<'a, T> EqualsTarget<'a> for &Slices<'a, T> {
     fn eq_impl(
         &self,
         slices: &[&'a str],
