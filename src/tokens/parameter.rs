@@ -51,7 +51,7 @@ impl<'a> Parsable<'a> for Parameter<'a> {
                 input,
                 Parameter {
                     key,
-                    value: Value { slices: value_slices },
+                    value: Value::new(value_slices),
                 },
             ))
         }

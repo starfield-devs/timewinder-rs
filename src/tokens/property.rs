@@ -23,7 +23,7 @@ impl<'a> Parsable<'a> for Property<'a> {
         move |input: &'a str| {
             let (input, key) = context(
                 "So-called properties with keys `BEGIN` or `END` are actually components",
-                verify(Key::parser(), |k: &Key| !k.equals_str("BEGIN") && !k.equals_str("END")),
+                verify(Key::parser(), |k: &Key| !k.equals("BEGIN") && !k.equals("END")),
             )
             .parse(input)?;
 

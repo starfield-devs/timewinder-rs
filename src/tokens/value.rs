@@ -1,5 +1,3 @@
-use std::fmt::{Debug, Formatter, Result};
-
 use nom::{
     Parser,
     bytes::complete::{tag, take_until},
@@ -8,27 +6,11 @@ use nom::{
     sequence::{preceded, terminated},
 };
 
-use crate::traits::Parsable;
+use crate::{slices::*, traits::Parsable};
 
-#[derive(Default, PartialEq, Eq)]
-pub struct Value<'a> {
-    pub slices: Vec<&'a str>,
-}
+pub struct ValueTag;
 
-impl<'a> Debug for Value<'a> {
-    fn fmt(
-        &self,
-        f: &mut Formatter<'_>,
-    ) -> Result {
-        write!(f, "{}", self.slices.concat())
-    }
-}
-
-impl<'a> AsRef<[&'a str]> for Value<'a> {
-    fn as_ref(&self) -> &[&'a str] {
-        &self.slices
-    }
-}
+pub type Value<'a> = SlicesWrapper<'a, ValueTag>;
 
 impl<'a> Parsable<'a> for Value<'a> {
     fn parser() -> impl Parser<&'a str, Output = Self, Error = nom::error::Error<&'a str>> {
@@ -39,7 +21,7 @@ impl<'a> Parsable<'a> for Value<'a> {
 
             continuations.insert(0, first_line);
 
-            Ok((input, Value { slices: continuations }))
+            Ok((input, Value::new(continuations)))
         }
     }
 }

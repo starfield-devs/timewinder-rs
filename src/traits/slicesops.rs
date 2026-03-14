@@ -7,21 +7,17 @@ pub trait SlicesOps<'a>: AsRef<[&'a str]> {
         self.as_ref()
     }
 
-    fn equals_slices(
+    fn equals<T>(
         &self,
-        other: &[&'a str],
-    ) -> bool {
-        iter_chars(self.slices()).eq(iter_chars(other))
+        other: T,
+    ) -> bool
+    where
+        T: EqualsTarget<'a>,
+    {
+        other.eq_impl(self.slices())
     }
 
-    fn equals_str(
-        &self,
-        target: &str,
-    ) -> bool {
-        iter_chars(self.slices()).eq(target.chars())
-    }
-
-    fn starts_with_str(
+    fn starts_with(
         &self,
         prefix: &str,
     ) -> bool {
@@ -39,4 +35,29 @@ pub trait SlicesOps<'a>: AsRef<[&'a str]> {
     }
 }
 
-impl<'a, T> SlicesOps<'a> for T where T: AsRef<[&'a str]> {}
+pub trait EqualsTarget<'a> {
+    fn eq_impl(
+        &self,
+        slices: &[&'a str],
+    ) -> bool;
+}
+
+/// Enables `T.equals("DEMO")`.
+impl<'a> EqualsTarget<'a> for &'a str {
+    fn eq_impl(
+        &self,
+        slices: &[&'a str],
+    ) -> bool {
+        iter_chars(slices).eq(self.chars())
+    }
+}
+
+/// Enables `T.equals(T.slices())`.
+impl<'a> EqualsTarget<'a> for &'a [&'a str] {
+    fn eq_impl(
+        &self,
+        slices: &[&'a str],
+    ) -> bool {
+        iter_chars(slices).eq(iter_chars(self))
+    }
+}

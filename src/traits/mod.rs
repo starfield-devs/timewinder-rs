@@ -1,5 +1,5 @@
 pub mod parsable;
 pub mod slicesops;
 
-pub use parsable::Parsable;
-pub use slicesops::SlicesOps;
+pub use parsable::*;
+pub use slicesops::*;

@@ -25,7 +25,7 @@ impl<'a> Parsable<'a> for Component<'a> {
         move |input: &'a str| {
             let (input, _) = context(
                 "Components must begin with a `BEGIN`",
-                verify(Key::parser(), |k: &Key| k.equals_str("BEGIN")),
+                verify(Key::parser(), |k: &Key| k.equals("BEGIN")),
             )
             .parse(input)?;
 
@@ -37,10 +37,7 @@ impl<'a> Parsable<'a> for Component<'a> {
 
             let (input, name) = context(
                 "Components names must start with `V`",
-                terminated(
-                    verify(Key::parser(), |k: &Key| k.starts_with_str("V")),
-                    opt(tag("\r\n")),
-                ),
+                terminated(verify(Key::parser(), |k: &Key| k.starts_with("V")), opt(tag("\r\n"))),
             )
             .parse(input)?;
 
@@ -49,7 +46,7 @@ impl<'a> Parsable<'a> for Component<'a> {
 
             let (input, _) = context(
                 "Components must end with an `END`",
-                verify(Key::parser(), |k: &Key| k.equals_str("END")),
+                verify(Key::parser(), |k: &Key| k.equals("END")),
             )
             .parse(input)?;
 
@@ -61,10 +58,7 @@ impl<'a> Parsable<'a> for Component<'a> {
 
             let (input, _) = context(
                 "Components names must start with `V`",
-                terminated(
-                    verify(Key::parser(), |k: &Key| k.equals_slices(name.slices())),
-                    opt(tag("\r\n")),
-                ),
+                terminated(verify(Key::parser(), |k: &Key| k.equals(&name)), opt(tag("\r\n"))),
             )
             .parse(input)?;
 
