@@ -1,13 +1,13 @@
 use nom::{
     Parser,
     branch::alt,
-    bytes::complete::{is_not, tag, take_while1},
+    bytes::complete::{is_not, take_while1},
     character::complete::char,
     combinator::opt,
-    error::{Error, context},
-    multi::many1,
+    multi::many0,
     sequence::{delimited, terminated},
 };
+use nom_supreme::{error::ErrorTree, parser_ext::ParserExt, tag::complete::tag};
 
 use crate::{
     tokens::{Key, Value},
@@ -21,29 +21,32 @@ pub struct Parameter<'a> {
 }
 
 impl<'a> Parsable<'a> for Parameter<'a> {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {
+    fn parser() -> impl Parser<&'a str, Self, ErrorTree<&'a str>> {
         move |input: &'a str| {
+            // parse the key
             let (input, key) = Key::parser().parse(input)?;
 
-            let (input, _) = context(
-                "Parameter key and value must be separated by `=`",
-                terminated(char('='), opt(tag("\r\n"))),
-            )
-            .parse(input)?;
+            // parse '=' separator
+            let (input, _) = terminated(char('='), opt(tag("\r\n")))
+                .context("Parameter key and value must be separated by '='")
+                .parse(input)?;
 
-            let (input, value_slices) = alt((
-                context(
-                    "Failed to consume quoted parameter value.",
-                    delimited(
-                        char('"'),
-                        many1(terminated(is_not("\"\r\n"), opt(tag("\r\n ")))),
-                        char('"'),
-                    ),
+            // parse the value until next `;` or `:` (zero-copy)
+            let (input, slices) = alt((
+                // quoted value
+                delimited(
+                    char('"'),
+                    many0(terminated(
+                        is_not("\"\r\n"),  // content inside quotes
+                        opt(tag("\r\n ")), // handle folded continuation
+                    )),
+                    char('"'),
                 ),
-                context(
-                    "Failed to consume normal parameter value.",
-                    many1(terminated(take_while1(|c| c != ':' && c != ';'), opt(tag("\r\n ")))),
-                ),
+                // unquoted value
+                many0(terminated(
+                    take_while1(|c| c != ';' && c != ':' && c != '\r' && c != '\n'),
+                    opt(tag("\r\n ")), // folded lines
+                )),
             ))
             .parse(input)?;
 
@@ -51,7 +54,7 @@ impl<'a> Parsable<'a> for Parameter<'a> {
                 input,
                 Parameter {
                     key,
-                    value: Value::new(value_slices),
+                    value: Value::new(slices),
                 },
             ))
         }

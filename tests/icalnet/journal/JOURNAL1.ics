@@ -8,7 +8,12 @@ BEGIN:VJOURNAL
 DTS
  TAMP:19970324T120000Z
 UID:uid5@host1.com
-ATTENDEE;CN=John Doe;RSVP=TRUE:MAILTO:john@example.com
+ATTENDEE;CN=John 
+ Doe;RSVP="
+ T
+ R
+ U
+ E":MAILTO:john@example.com
 ORGANIZER:MAILTO:jsmith@host.com
 STATUS:DRAFT
 CLASS:PUBLIC

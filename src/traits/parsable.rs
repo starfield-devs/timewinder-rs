@@ -1,5 +1,6 @@
-use nom::{Parser, error::Error};
+use nom::Parser;
+use nom_supreme::error::ErrorTree;
 
 pub trait Parsable<'a>: Sized {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>>;
+    fn parser() -> impl Parser<&'a str, Self, ErrorTree<&'a str>>;
 }

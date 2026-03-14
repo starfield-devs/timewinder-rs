@@ -1,10 +1,10 @@
 use nom::{
     Parser,
-    bytes::complete::{tag, take_until},
-    combinator::verify,
-    error::{Error, context},
+    character::complete::one_of,
+    combinator::{opt, verify},
     sequence::terminated,
 };
+use nom_supreme::{error::ErrorTree, parser_ext::ParserExt, tag::complete::tag};
 
 use crate::{
     tokens::{Key, Parameter, Value},
@@ -19,34 +19,34 @@ pub struct Property<'a> {
 }
 
 impl<'a> Parsable<'a> for Property<'a> {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {
+    fn parser() -> impl Parser<&'a str, Self, ErrorTree<&'a str>> {
         move |input: &'a str| {
-            let (input, key) = context(
-                "So-called properties with keys `BEGIN` or `END` are actually components",
-                verify(Key::parser(), |k: &Key| !k.equals("BEGIN") && !k.equals("END")),
-            )
+            let (mut input, key) = verify(terminated(Key::parser(), opt(tag("\r\n"))), |k: &Key| {
+                !k.equals("BEGIN") && !k.equals("END")
+            })
+            .context("")
             .parse(input)?;
 
-            // // TOOD: handle parameters vs going straight to values
-            // let (input, parameters) = many0(Parameter::parser()).parse(input)?;
-            // let (input, _) = context(
-            //     "Properties must have `:` in `KEY:VALUE`",
-            //     terminated(char(':'), opt(tag("\r\n"))),
-            // )
-            // .parse(input)?;
-            // // DELETEME NOTE: This bypasses parameters for testing.
-            let (input, _) = terminated(take_until(":"), tag(":")).parse(input)?;
+            let mut parameters = Vec::new();
 
+            while let Ok((i, delim)) = one_of::<&str, _, ErrorTree<&str>>(";:").parse(input) {
+                input = i;
+
+                match delim {
+                    ';' => {
+                        let (i, param) = Parameter::parser().parse(input)?;
+                        parameters.push(param);
+                        input = i;
+                    }
+                    ':' => break,
+                    _ => unreachable!("one_of guarantees either ';' or ':'"),
+                }
+            }
+
+            // parse the value after the colon
             let (input, value) = Value::parser().parse(input)?;
 
-            Ok((
-                input,
-                Property {
-                    key,
-                    value,
-                    ..Default::default()
-                },
-            ))
+            Ok((input, Property { key, value, parameters }))
         }
     }
 }
