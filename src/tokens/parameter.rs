@@ -4,7 +4,7 @@ use nom::{
     bytes::complete::{is_not, tag, take_while1},
     character::complete::char,
     combinator::opt,
-    error::context,
+    error::{Error, context},
     multi::many1,
     sequence::{delimited, terminated},
 };
@@ -21,7 +21,7 @@ pub struct Parameter<'a> {
 }
 
 impl<'a> Parsable<'a> for Parameter<'a> {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = nom::error::Error<&'a str>> {
+    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {
         move |input: &'a str| {
             let (input, key) = Key::parser().parse(input)?;
 

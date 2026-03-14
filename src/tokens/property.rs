@@ -2,7 +2,7 @@ use nom::{
     Parser,
     bytes::complete::{tag, take_until},
     combinator::verify,
-    error::context,
+    error::{Error, context},
     sequence::terminated,
 };
 
@@ -19,7 +19,7 @@ pub struct Property<'a> {
 }
 
 impl<'a> Parsable<'a> for Property<'a> {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = nom::error::Error<&'a str>> {
+    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {
         move |input: &'a str| {
             let (input, key) = context(
                 "So-called properties with keys `BEGIN` or `END` are actually components",

@@ -2,6 +2,7 @@ use nom::{
     Parser,
     bytes::complete::{tag, take_until},
     character::complete::one_of,
+    error::Error,
     multi::many0,
     sequence::{preceded, terminated},
 };
@@ -13,7 +14,7 @@ pub struct ValueTag;
 pub type Value<'a> = SlicesWrapper<'a, ValueTag>;
 
 impl<'a> Parsable<'a> for Value<'a> {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = nom::error::Error<&'a str>> {
+    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {
         move |input: &'a str| {
             let (input, first_line) = terminated(take_until("\r\n"), tag("\r\n")).parse(input)?;
             let (input, mut continuations) =

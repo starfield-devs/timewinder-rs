@@ -3,7 +3,7 @@ use nom::{
     bytes::complete::tag,
     character::complete::char,
     combinator::{opt, verify},
-    error::context,
+    error::{Error, context},
     multi::many0,
     sequence::terminated,
 };
@@ -21,7 +21,7 @@ pub struct Component<'a> {
 }
 
 impl<'a> Parsable<'a> for Component<'a> {
-    fn parser() -> impl Parser<&'a str, Output = Self, Error = nom::error::Error<&'a str>> {
+    fn parser() -> impl Parser<&'a str, Output = Self, Error = Error<&'a str>> {
         move |input: &'a str| {
             let (input, _) = context(
                 "Components must begin with a `BEGIN`",
