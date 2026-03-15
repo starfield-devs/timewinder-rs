@@ -1,13 +1,15 @@
-use std::{
-    fmt::{Debug, Formatter, Result},
-    marker::PhantomData,
-};
+use std::marker::PhantomData;
+
+use derive_more::{Debug, Index};
+use itertools::Itertools;
 
 use crate::traits::*;
 
-#[derive(PartialEq, Eq)]
+#[derive(Eq, Debug, Index, PartialEq)]
+#[debug("{}", slices.iter().join(""))]
 pub struct Slices<'a, T> {
-    pub slices: Vec<&'a str>,
+    #[index]
+    slices: Vec<&'a str>,
     _marker: PhantomData<T>,
 }
 
@@ -26,18 +28,6 @@ impl<'a, T> Default for Slices<'a, T> {
             slices: Vec::default(),
             _marker: PhantomData,
         }
-    }
-}
-
-impl<'a, T> Debug for Slices<'a, T> {
-    fn fmt(
-        &self,
-        f: &mut Formatter<'_>,
-    ) -> Result {
-        for s in &self.slices {
-            write!(f, "{}", s)?;
-        }
-        Ok(())
     }
 }
 
